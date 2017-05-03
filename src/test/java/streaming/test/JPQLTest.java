@@ -211,7 +211,7 @@ public class JPQLTest {
     public void req21() {
         EntityManager em = Persistence.createEntityManagerFactory("PU").createEntityManager();
 //        Query query = em.createQuery("SELECT count(f) FROM Film f GROUP BY f.genre");
-        Query query = em.createQuery("SELECT g.nom,count(f) FROM Film f JOIN f.genre g GROUP BY f.genre");
+        Query query = em.createQuery("SELECT g.nom,count(f) FROM Film f JOIN f.genre g GROUP BY g");
 
         List<Object[]> l = query.getResultList();
            for(Object[] o:l ){
@@ -223,11 +223,11 @@ public class JPQLTest {
     public void req22() {
         EntityManager em = Persistence.createEntityManagerFactory("PU").createEntityManager();
 //        Query query = em.createQuery("SELECT count(f) FROM Film f GROUP BY f.genre");
-        Query query = em.createQuery("SELECT r.prenom, r.nom,r.id,count(f) FROM Film f JOIN f.realisateurs r GROUP BY r");
+        Query query = em.createQuery("SELECT r.prenom, r.nom, count(f) nbFilms FROM Film f JOIN f.realisateurs r GROUP BY r ORDER BY nbfilms, r.nom, r.prenom");
 
         List<Object[]> l = query.getResultList();
            for(Object[] o:l ){
-            System.out.println(o[0]+" "+o[1]+"   "+o[2]+"   "+o[3]);
+            System.out.println(String.format("%s %s %d", o[0],o[1],o[2]));
         }
            
     }  
@@ -236,12 +236,40 @@ public class JPQLTest {
     public void req23() {
         EntityManager em = Persistence.createEntityManagerFactory("PU").createEntityManager();
 //        Query query = em.createQuery("SELECT count(f) FROM Film f GROUP BY f.genre");
-        Query query = em.createQuery("SELECT Cr.nom,r.id,count(f) FROM Film f JOIN f.realisateurs r GROUP BY r");
+        Query query = em.createQuery("SELECT r.nom, r.prenom, count(f) nbf FROM Film f JOIN f.realisateurs r GROUP BY r "
+                + "HAVING nbf>1 "
+                + "ORDER BY nbf ");//having est le where de order by
 
         List<Object[]> l = query.getResultList();
            for(Object[] o:l ){
-            System.out.println(o[0]+" "+o[1]+"   "+o[2]+"   "+o[3]);
+            System.out.println(String.format("%s %s %d", o[0],o[1],o[2]));
         }
     }   
     
+       
+        @Test
+    public void req24() {
+        EntityManager em = Persistence.createEntityManagerFactory("PU").createEntityManager();
+//        Query query = em.createQuery("SELECT count(f) FROM Film f GROUP BY f.genre");
+        Query query = em.createQuery("SELECT sr.titre, count(sa) nsa  FROM Serie sr JOIN sr.saisons sa GROUP BY sr ORDER BY nsa, sr.titre ");//having est le where de order by
+
+        List<Object[]> l = query.getResultList();
+           for(Object[] o:l ){
+            System.out.println(String.format("%s %d", o[0],o[1]));
+        }
+    } 
+    
+            @Test
+    public void req25() {
+        EntityManager em = Persistence.createEntityManagerFactory("PU").createEntityManager();
+//        Query query = em.createQuery("SELECT count(f) FROM Film f GROUP BY f.genre");
+        Query query = em.createQuery("SELECT sr.titre, count(ep) nep  FROM Serie sr JOIN sr.saisons sa JOIN sa.episodes ep GROUP BY sr HAVING nep>5 "
+                + " ORDER BY nep");//having est le where de order by
+
+        List<Object[]> l = query.getResultList();
+           for(Object[] o:l ){
+            System.out.println(String.format("%s %d", o[0],o[1]));
+        }
+    }    
+   
 }
